@@ -28,10 +28,11 @@ func IsNotFound(err error) bool {
 
 // Workbook contains information about a Tableau Public workbook.
 type Workbook struct {
-	RepoURL     string `json:"workbookRepoUrl"`
-	Size        int64  `json:"size"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
+	RepoURL       string `json:"workbookRepoUrl"`
+	Size          int64  `json:"size"`
+	Title         string `json:"title"`
+	Description   string `json:"description"`
+	ShowInProfile bool   `json:"showInProfile"`
 }
 
 // DownloadWorkbookFile downloads the workbook to the directory and returns
@@ -71,6 +72,23 @@ func DownloadWorkbookFile(repoURL string, directory string) (filename string, er
 
 	_, err = io.Copy(out, res.Body)
 	return
+}
+
+// ProfileWorkbooks gets a list of all workbooks shown in the
+// profile for the username.
+func ProfileWorkbooks(username string) ([]*Workbook, error) {
+	var filtered []*Workbook
+	all, err := AllWorkbooks(username)
+
+	for _, wb := range all {
+		if !wb.ShowInProfile {
+			continue
+		}
+
+		filtered = append(filtered, wb)
+	}
+
+	return filtered, err
 }
 
 // AllWorkbooks gets a list of all workbooks for the username.
